@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 
 	cryptography "github.com/Ty-Grisham/file-encryption"
 )
@@ -53,9 +54,9 @@ func main() {
 // createEncFile extracts the content from the input unencrypted file,
 // and creates a new encrypted file with the given key and returns the
 // name of the created encrypted file (string) a potential error
-func createEncFile(uFilename, outName string, key []byte) (string, error) {
+func createEncFile(uFilepath, outName string, key []byte) (string, error) {
 	// Extract unencrypted data from given file
-	uData, err := os.ReadFile(uFilename)
+	uData, err := os.ReadFile(uFilepath)
 	if err != nil {
 		return "", err
 	}
@@ -66,17 +67,7 @@ func createEncFile(uFilename, outName string, key []byte) (string, error) {
 		return "", err
 	}
 
-	// Make name for new encrypted file
-	var eName string
-	if outName != "" {
-		if outName[len(outName)-len(encExt):] == encExt {
-			eName = outName
-		} else {
-			eName = outName + encExt
-		}
-	} else {
-		eName = uFilename + encExt
-	}
+	eName := genEName(path.Base(uFilepath), outName)
 
 	// Write new encrypted file
 	return eName, os.WriteFile(eName, eData, 0644)
@@ -86,14 +77,14 @@ func createEncFile(uFilename, outName string, key []byte) (string, error) {
 // and creates a new decrypted file with the given key and returns the
 // name of the file created (string) and a potential error. Encrypted
 // files must end in the defined encrypted extension to be accepted
-func createDecFile(eFilename, outName string, key []byte) (string, error) {
+func createDecFile(eFilepath, outName string, key []byte) (string, error) {
 	// Check to see that the given file ends in the proper file extension
-	if eFilename[len(eFilename)-len(encExt):] != encExt {
+	if eFilepath[len(eFilepath)-len(encExt):] != encExt {
 		return "", fmt.Errorf("improper file extension; should end with %q", encExt)
 	}
 
 	// Extract encrypted data from given file
-	eData, err := os.ReadFile(eFilename)
+	eData, err := os.ReadFile(eFilepath)
 	if err != nil {
 		return "", err
 	}
@@ -104,14 +95,39 @@ func createDecFile(eFilename, outName string, key []byte) (string, error) {
 		return "", err
 	}
 
-	// Make name for decrypted file
+	dName := genDName(path.Base(eFilepath), outName)
+
+	// Write new decrypted file
+	return dName, os.WriteFile(dName, dData, 0644)
+}
+
+// genEName creates the filename of the encrypted file
+func genEName(uName, outName string) string {
+	var eName string
+	if outName != "" {
+		// Checking to see if the .enc extension was already included
+		// as part of outName
+		if outName[len(outName)-len(encExt):] == encExt {
+			eName = outName
+		} else {
+			eName = outName + encExt
+		}
+	} else {
+		eName = uName + encExt
+	}
+	return eName
+}
+
+// genDName creates the filename for the decrypted file
+func genDName(eName, outName string) string {
 	var dName string
 	if outName != "" {
 		dName = outName
 	} else {
-		dName = eFilename[:len(eFilename)-len(encExt)]
+		dName = eName[:len(eName)-len(encExt)]
 	}
 
-	// Write new decrypted file
-	return dName, os.WriteFile(dName, dData, 0644)
+	dName = "DECRYPTED-" + dName
+
+	return dName
 }
