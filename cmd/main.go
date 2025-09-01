@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	cryptography "github.com/Ty-Grisham/file-encryption"
+	cryptography "github.com/Ty-Grisham/skytale"
 )
 
 var ErrInvalidExtension = errors.New("invalid file extension")

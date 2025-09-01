@@ -8,20 +8,6 @@ import (
 	"io"
 )
 
-// GenerateKey generates a random and safe key for AES-256 encryption.
-// Returns a 32 byte long slice of random bytes
-func GenerateKey() ([]byte, error) {
-	// Generate an empty slice that is x bytes long
-	key := make([]byte, 32) // 32 bytes for AES-256
-	// Write random bytes to fill 'key'
-	_, err := rand.Read(key)
-	if err != nil {
-		return nil, err
-	}
-
-	return key, nil
-}
-
 // encrypt encrypts the input data with the input key using AES-GCM.
 // Returns a slice of bytes containing encrypted data or a potential error
 func Encrypt(data, key []byte) ([]byte, error) {
