@@ -3,19 +3,20 @@ package main
 import (
 	"bytes"
 	"os"
-	"path"
+
+	// "path"
 	"testing"
 )
 
 const (
-	uFilepath = "../testdata/test1.md"
-	expEName  = "test1.md.enc"
-	expDName  = "DECRYPTED-test1.md"
+	uPath    = "../testdata/test1.md"
+	expEPath = "../testdata/test1.md.enc"
+	expDPath = "../testdata/DECRYPTED-test1.md"
 )
 
 var (
-	resEName = genEName(path.Base(uFilepath), "")
-	resDName = genDName(path.Base(resEName), "")
+	resEPath = genEPath(uPath)
+	resDPath = genDPath(resEPath)
 )
 
 // TestMain facilitates the preparing, running, and cleaning of the test
@@ -25,8 +26,8 @@ func TestMain(m *testing.M) {
 	result := m.Run()
 
 	// Cleaning up
-	os.Remove(resEName)
-	os.Remove(resDName)
+	os.Remove(resEPath)
+	os.Remove(resDPath)
 
 	os.Exit(result)
 }
@@ -38,25 +39,25 @@ func TestFunctionality(t *testing.T) {
 	// test file
 	t.Run("TestBasic", func(t *testing.T) {
 		// Encrypting file
-		eFilename, err := createEncFile(uFilepath, "", []byte(tempKey))
+		ePath, err := createEncFile(uPath, []byte(tempKey))
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		// Decrypting file
-		dFilename, err := createDecFile(eFilename, "", []byte(tempKey))
+		dPath, err := createDecFile(ePath, []byte(tempKey))
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		// Checking that the file was properly encrypted and decrypted
-		assertBytesFiles(t, uFilepath, dFilename)
+		assertBytesFiles(t, uPath, dPath)
 	})
 
 	// TestLogistics tests whether the created names are as expected
 	t.Run("TestLogistics", func(t *testing.T) {
-		assertStrings(t, expEName, resEName)
-		assertStrings(t, expDName, resDName)
+		assertStrings(t, expEPath, resEPath)
+		assertStrings(t, expDPath, resDPath)
 	})
 }
 
