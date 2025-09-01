@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -8,6 +9,8 @@ import (
 
 	cryptography "github.com/Ty-Grisham/file-encryption"
 )
+
+var ErrInvalidExtension = errors.New("invalid file extension")
 
 const (
 	tempKey = "0123456789qwerty" // hardcoding the key; will be changed later
@@ -79,7 +82,7 @@ func createEncFile(uPath string, key []byte) (string, error) {
 func createDecFile(ePath string, key []byte) (string, error) {
 	// Check to see that the given file ends in the proper file extension
 	if ePath[len(ePath)-len(eExt):] != eExt {
-		return "", fmt.Errorf("improper file extension; should end with %q", eExt)
+		return "", ErrInvalidExtension
 	}
 
 	// Extract encrypted data from given file

@@ -55,20 +55,45 @@ func TestFunctionality(t *testing.T) {
 	})
 
 	// TestLogistics tests whether the created names are as expected
-	t.Run("TestLogistics", func(t *testing.T) {
+	t.Run("FileNaming", func(t *testing.T) {
 		assertStrings(t, expEPath, resEPath)
 		assertStrings(t, expDPath, resDPath)
 	})
 }
 
+// TestErrors tests the program with input that should raise errors
+func TestErrors(t *testing.T) {
+	// InvalidExtension tests the createDecFile function when it is provided with
+	// an input filepath that has an invalid file extension
+	t.Run("InvalidExtension", func(t *testing.T) {
+		// Attempting to decrypt file
+		dPath, err := createDecFile(uPath, []byte(tempKey)) // The extension of uPath is .md
+		assertErrors(t, err, ErrInvalidExtension)
+		os.Remove(dPath) // File is deleted if created
+	})
+}
+
+// assertErrors is a helper function that asserts that an error should be raised and
+// and the error should be the one specified in the input
+func assertErrors(t *testing.T, res, exp error) {
+	t.Helper()
+	if res == nil {
+		t.Fatal("Expected error, but none were raised")
+	}
+
+	if res != exp {
+		t.Errorf("Expected %q, got %q", exp, res)
+	}
+}
+
 // assertStrings is a helper function that compares the input result string
 // to the input expected dtring
-func assertStrings(t *testing.T, exp, res string) {
+func assertStrings(t *testing.T, res, exp string) {
 	t.Helper()
 
 	// Compare strings
 	if res != exp {
-		t.Fatalf("Expected %q, got %q\n", exp, res)
+		t.Errorf("Expected %q, got %q", exp, res)
 	}
 }
 
@@ -90,7 +115,7 @@ func assertBytesFiles(t *testing.T, expFile, resFile string) {
 
 	// Compare bytes
 	if !bytes.Equal(res, exp) {
-		t.Fatal("resulting file does not match the expected file")
+		t.Error("resulting file does not match the expected file")
 	}
 
 }
