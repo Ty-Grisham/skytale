@@ -10,11 +10,15 @@ import (
 	cryptography "github.com/Ty-Grisham/skytale"
 )
 
-var ErrInvalidExtension = errors.New("invalid file extension")
+var (
+	ErrInvalidExtension = errors.New("invalid file extension")
+	ErrEnvNotSet        = errors.New("environment variable for encryption key not set")
+	ErrEnvDoesNotExist  = errors.New("environment variable does not exist")
+)
 
 const (
-	tempKey = "0123456789qwerty" // hardcoding the key; will be changed later
-	eExt    = ".enc"             // encyrption file extension
+	envVar = "AES_KEY" //  Name of environment variable for encryption key
+	eExt   = ".enc"    // encyrption file extension
 )
 
 func main() {
@@ -24,10 +28,16 @@ func main() {
 
 	flag.Parse()
 
+	// Acquire key from environment variable
+	key, err := getKey(envVar)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
 	switch {
 	// Encrypt file
 	case *encrypt != "":
-		cFilename, err := createEncFile(*encrypt, []byte(tempKey))
+		cFilename, err := createEncFile(*encrypt, key)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -37,7 +47,7 @@ func main() {
 
 	// Decrypt file
 	case *decrypt != "":
-		cFilename, err := createDecFile(*decrypt, []byte(tempKey))
+		cFilename, err := createDecFile(*decrypt, key)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -134,4 +144,21 @@ func genDPath(ePath string) string {
 	// }
 
 	return dPath
+}
+
+// getKey
+func getKey(envVar string) ([]byte, error) {
+	// Acquire keypath from environment variable
+	keyPath, envExists := os.LookupEnv(envVar)
+
+	switch {
+	case !envExists:
+		return nil, ErrEnvDoesNotExist
+	case keyPath == "":
+		return nil, ErrEnvNotSet
+	case keyPath != "":
+		return os.ReadFile(keyPath)
+	default:
+		return nil, fmt.Errorf("could not obtain environment variable")
+	}
 }
