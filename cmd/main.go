@@ -43,7 +43,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Fprintf(os.Stdout, "Creating encrypted file: %s\n", cFilename)
+		fmt.Fprintf(os.Stdout, "Created encrypted file: %s\n", cFilename)
 
 	// Decrypt file
 	case *decrypt != "":
@@ -53,7 +53,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Fprintf(os.Stdout, "Creating decrypted file: %s\n", cFilename)
+		fmt.Fprintf(os.Stdout, "Created decrypted file: %s\n", cFilename)
 
 	default:
 		// Invalid flag provided

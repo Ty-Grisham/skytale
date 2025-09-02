@@ -24,11 +24,6 @@ var (
 // and the resulting test artifacts
 func TestMain(m *testing.M) {
 
-	fmt.Println("Setting up environment...")
-
-	// Setting up environment
-	ogEnv := os.Getenv(envVar)
-
 	fmt.Println("Running tests...")
 
 	// Running tests
@@ -39,7 +34,6 @@ func TestMain(m *testing.M) {
 	// Cleaning up
 	os.Remove(resEPath)
 	os.Remove(resDPath)
-	os.Setenv(envVar, ogEnv)
 
 	os.Exit(result)
 }
@@ -88,7 +82,7 @@ func TestErrors(t *testing.T) {
 func TestReadKey(t *testing.T) {
 	// ExpectedInput should read key and produce no errors
 	t.Run("ExpectedInput", func(t *testing.T) {
-		os.Setenv(envVar, testKeyPath)
+		t.Setenv(envVar, testKeyPath)
 		_, err := readKey(envVar)
 		if err != nil {
 			t.Errorf("Error in ExpectedInput: %q", err)
@@ -98,7 +92,7 @@ func TestReadKey(t *testing.T) {
 	// EnvNotSet tests the output of readKey with no environment variable set
 	// e.g. envVar=""
 	t.Run("EnvNotSet", func(t *testing.T) {
-		os.Setenv(envVar, "")
+		t.Setenv(envVar, "")
 		_, err := readKey(envVar)
 		assertErrors(t, err, ErrEnvNotSet)
 	})
