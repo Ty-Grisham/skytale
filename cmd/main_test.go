@@ -104,6 +104,14 @@ func TestReadKey(t *testing.T) {
 		_, err := readKey(envVar)
 		assertErrors(t, err, ErrEnvDoesNotExist)
 	})
+
+	// InvalidKeyExtension tests the output of readKey when the key file in the
+	// environment variable has an invalid file extension
+	t.Run("InvalidKeyExtension", func(t *testing.T) {
+		t.Setenv(envVar, uPath)
+		_, err := readKey(envVar)
+		assertErrors(t, err, ErrInvalidExtension)
+	})
 }
 
 // assertErrors is a helper function that asserts that an error should be raised and

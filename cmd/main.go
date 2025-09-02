@@ -17,8 +17,9 @@ var (
 )
 
 const (
-	envVar = "AES_KEY" //  Name of environment variable for encryption key
+	envVar = "AES_KEY" // name of environment variable for encryption key
 	eExt   = ".enc"    // encyrption file extension
+	keyExt = ".aes"    // key file extension
 )
 
 func main() {
@@ -156,7 +157,9 @@ func readKey(envVar string) ([]byte, error) {
 		return nil, ErrEnvDoesNotExist
 	case keyPath == "":
 		return nil, ErrEnvNotSet
-	case keyPath != "":
+	case keyPath[len(keyPath)-len(keyExt):] != keyExt: // checking for correct file extension
+		return nil, ErrInvalidExtension
+	case keyPath != "" && keyPath[len(keyPath)-len(keyExt):] == keyExt:
 		return os.ReadFile(keyPath)
 	default:
 		return nil, fmt.Errorf("could not obtain environment variable")
