@@ -2,19 +2,20 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
-
-	// "path"
 	"testing"
 )
 
 const (
-	uPath    = "../testdata/test1.md"
-	expEPath = "../testdata/test1.md.enc"
-	expDPath = "../testdata/DECRYPTED-test1.md"
+	testKeyPath = "../testdata/testKey.aes"
+	uPath       = "../testdata/test1.md"
+	expEPath    = "../testdata/test1.md.enc"
+	expDPath    = "../testdata/DECRYPTED-test1.md"
 )
 
 var (
+	tmpKey   = []byte("0123456789qwerty")
 	resEPath = genEPath(uPath)
 	resDPath = genDPath(resEPath)
 )
@@ -22,12 +23,23 @@ var (
 // TestMain facilitates the preparing, running, and cleaning of the test
 // and the resulting test artifacts
 func TestMain(m *testing.M) {
+
+	fmt.Println("Setting up environment...")
+
+	// Setting up environment
+	ogEnv := os.Getenv(envVar)
+
+	fmt.Println("Running tests...")
+
 	// Running tests
 	result := m.Run()
+
+	fmt.Println("Cleaning up...")
 
 	// Cleaning up
 	os.Remove(resEPath)
 	os.Remove(resDPath)
+	os.Setenv(envVar, ogEnv)
 
 	os.Exit(result)
 }
@@ -39,13 +51,13 @@ func TestFunctionality(t *testing.T) {
 	// test file
 	t.Run("TestBasic", func(t *testing.T) {
 		// Encrypting file
-		ePath, err := createEncFile(uPath, []byte(tempKey))
+		ePath, err := createEncFile(uPath, []byte(tmpKey))
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		// Decrypting file
-		dPath, err := createDecFile(ePath, []byte(tempKey))
+		dPath, err := createDecFile(ePath, []byte(tmpKey))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -67,9 +79,36 @@ func TestErrors(t *testing.T) {
 	// an input filepath that has an invalid file extension
 	t.Run("InvalidExtension", func(t *testing.T) {
 		// Attempting to decrypt file
-		dPath, err := createDecFile(uPath, []byte(tempKey)) // The extension of uPath is .md
+		dPath, err := createDecFile(uPath, []byte(tmpKey)) // The extension of uPath is .md
 		assertErrors(t, err, ErrInvalidExtension)
 		os.Remove(dPath) // File is deleted if created
+	})
+}
+
+func TestReadKey(t *testing.T) {
+	// ExpectedInput should read key and produce no errors
+	t.Run("ExpectedInput", func(t *testing.T) {
+		os.Setenv(envVar, testKeyPath)
+		_, err := readKey(envVar)
+		if err != nil {
+			t.Errorf("Error in ExpectedInput: %q", err)
+		}
+	})
+
+	// EnvNotSet tests the output of readKey with no environment variable set
+	// e.g. envVar=""
+	t.Run("EnvNotSet", func(t *testing.T) {
+		os.Setenv(envVar, "")
+		_, err := readKey(envVar)
+		assertErrors(t, err, ErrEnvNotSet)
+	})
+
+	// EnvDoesNotExist tests the output of readKey when the environment variable
+	// does not exist
+	t.Run("EnvDoesNotExist", func(t *testing.T) {
+		os.Unsetenv(envVar)
+		_, err := readKey(envVar)
+		assertErrors(t, err, ErrEnvDoesNotExist)
 	})
 }
 

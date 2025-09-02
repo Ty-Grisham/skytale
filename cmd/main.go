@@ -29,7 +29,7 @@ func main() {
 	flag.Parse()
 
 	// Acquire key from environment variable
-	key, err := getKey(envVar)
+	key, err := readKey(envVar)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
@@ -147,7 +147,7 @@ func genDPath(ePath string) string {
 }
 
 // getKey
-func getKey(envVar string) ([]byte, error) {
+func readKey(envVar string) ([]byte, error) {
 	// Acquire keypath from environment variable
 	keyPath, envExists := os.LookupEnv(envVar)
 
