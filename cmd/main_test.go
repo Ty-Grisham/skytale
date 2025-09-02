@@ -16,8 +16,8 @@ const (
 
 var (
 	tmpKey   = []byte("0123456789qwerty")
-	resEPath = genEPath(uPath)
-	resDPath = genDPath(resEPath)
+	resEPath = genEPath(uPath, eExt)
+	resDPath = genDPath(resEPath, eExt)
 )
 
 // TestMain facilitates the preparing, running, and cleaning of the test
@@ -38,32 +38,33 @@ func TestMain(m *testing.M) {
 	os.Exit(result)
 }
 
-// TestExpexted will test that all phases of the program will work
-// given the proper expected inputs and no specified outName
+// TestFunctionality will test the overall process of the encrypting/decrypting
+// given the expected (correct) inputs. This test should encounter no errors
 func TestFunctionality(t *testing.T) {
-	// TestBasicFunctionality tests the basic encrypting/decrypting of the
-	// test file
+	// TestBasic tests the basic encrypting/decrypting of the
+	// test file without concerning itself with the names of
+	// the files
 	t.Run("TestBasic", func(t *testing.T) {
 		// Encrypting file
-		ePath, err := createEncFile(uPath, []byte(tmpKey))
+		ePath, err := createEFile(uPath, eExt, []byte(tmpKey))
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		// Decrypting file
-		dPath, err := createDecFile(ePath, []byte(tmpKey))
+		dPath, err := createDFile(ePath, eExt, []byte(tmpKey))
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		// Checking that the file was properly encrypted and decrypted
-		assertBytesFiles(t, uPath, dPath)
+		assertBytesFiles(t, dPath, uPath)
 	})
 
-	// TestLogistics tests whether the created names are as expected
-	t.Run("FileNaming", func(t *testing.T) {
-		assertStrings(t, expEPath, resEPath)
-		assertStrings(t, expDPath, resDPath)
+	// PathCreation tests whether the created paths are as expected
+	t.Run("PathCreation", func(t *testing.T) {
+		assertStrings(t, resEPath, expEPath)
+		assertStrings(t, resDPath, expDPath)
 	})
 }
 
@@ -73,7 +74,7 @@ func TestErrors(t *testing.T) {
 	// an input filepath that has an invalid file extension
 	t.Run("InvalidExtension", func(t *testing.T) {
 		// Attempting to decrypt file
-		dPath, err := createDecFile(uPath, []byte(tmpKey)) // The extension of uPath is .md
+		dPath, err := createDFile(uPath, eExt, []byte(tmpKey)) // The extension of uPath is .md
 		assertErrors(t, err, ErrInvalidExtension)
 		os.Remove(dPath) // File is deleted if created
 	})
@@ -83,7 +84,7 @@ func TestReadKey(t *testing.T) {
 	// ExpectedInput should read key and produce no errors
 	t.Run("ExpectedInput", func(t *testing.T) {
 		t.Setenv(envVar, testKeyPath)
-		_, err := readKey(envVar)
+		_, err := readKey(envVar, keyExt)
 		if err != nil {
 			t.Errorf("Error in ExpectedInput: %q", err)
 		}
@@ -93,7 +94,7 @@ func TestReadKey(t *testing.T) {
 	// e.g. envVar=""
 	t.Run("EnvNotSet", func(t *testing.T) {
 		t.Setenv(envVar, "")
-		_, err := readKey(envVar)
+		_, err := readKey(envVar, keyExt)
 		assertErrors(t, err, ErrEnvNotSet)
 	})
 
@@ -101,7 +102,7 @@ func TestReadKey(t *testing.T) {
 	// does not exist
 	t.Run("EnvDoesNotExist", func(t *testing.T) {
 		os.Unsetenv(envVar)
-		_, err := readKey(envVar)
+		_, err := readKey(envVar, keyExt)
 		assertErrors(t, err, ErrEnvDoesNotExist)
 	})
 
@@ -109,7 +110,7 @@ func TestReadKey(t *testing.T) {
 	// environment variable has an invalid file extension
 	t.Run("InvalidKeyExtension", func(t *testing.T) {
 		t.Setenv(envVar, uPath)
-		_, err := readKey(envVar)
+		_, err := readKey(envVar, keyExt)
 		assertErrors(t, err, ErrInvalidExtension)
 	})
 }
@@ -140,7 +141,7 @@ func assertStrings(t *testing.T, res, exp string) {
 
 // assertBytes is a helper function that checks that bytes in the result file
 // are the same as the bytes in the expected file
-func assertBytesFiles(t *testing.T, expFile, resFile string) {
+func assertBytesFiles(t *testing.T, resFile, expFile string) {
 	t.Helper()
 
 	// Read data from files

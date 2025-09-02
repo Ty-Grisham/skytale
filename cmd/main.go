@@ -30,7 +30,7 @@ func main() {
 	flag.Parse()
 
 	// Acquire key from environment variable
-	key, err := readKey(envVar)
+	key, err := readKey(envVar, keyExt)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
@@ -38,7 +38,7 @@ func main() {
 	switch {
 	// Encrypt file
 	case *encrypt != "":
-		cFilename, err := createEncFile(*encrypt, key)
+		cFilename, err := createEFile(*encrypt, eExt, key)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -48,7 +48,7 @@ func main() {
 
 	// Decrypt file
 	case *decrypt != "":
-		cFilename, err := createDecFile(*decrypt, key)
+		cFilename, err := createDFile(*decrypt, eExt, key)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -64,10 +64,11 @@ func main() {
 	}
 }
 
-// createEncFile extracts the content from the input unencrypted file,
+// createEFile extracts the content from the input unencrypted filepath (uPath),
 // and creates a new encrypted file with the given key and returns the
-// name of the created encrypted file (string) a potential error
-func createEncFile(uPath string, key []byte) (string, error) {
+// path of the created encrypted file (string) a potential error. eExt represents
+// the user-defined file extension of encrypted files.
+func createEFile(uPath, eExt string, key []byte) (string, error) {
 	// Extract unencrypted data from given file
 	uData, err := os.ReadFile(uPath)
 	if err != nil {
@@ -80,17 +81,18 @@ func createEncFile(uPath string, key []byte) (string, error) {
 		return "", err
 	}
 
-	eName := genEPath(uPath)
+	ePath := genEPath(uPath, eExt)
 
 	// Write new encrypted file
-	return eName, os.WriteFile(eName, eData, 0644)
+	return ePath, os.WriteFile(ePath, eData, 0644)
 }
 
-// createDeFile extracts the content from th input encrypted file,
+// createDFile extracts the content from th input encrypted filepath (ePath),
 // and creates a new decrypted file with the given key and returns the
-// name of the file created (string) and a potential error. Encrypted
-// files must end in the defined encrypted extension to be accepted
-func createDecFile(ePath string, key []byte) (string, error) {
+// path of the newly created decrypted file (string) and a potential error.
+// Encrypted files must end in the defined encrypted extension (eExt) to be
+// accepted.
+func createDFile(ePath, eExt string, key []byte) (string, error) {
 	// Check to see that the given file ends in the proper file extension
 	if ePath[len(ePath)-len(eExt):] != eExt {
 		return "", ErrInvalidExtension
@@ -108,47 +110,35 @@ func createDecFile(ePath string, key []byte) (string, error) {
 		return "", err
 	}
 
-	dPath := genDPath(ePath)
+	dPath := genDPath(ePath, eExt)
 
 	// Write new decrypted file
 	return dPath, os.WriteFile(dPath, dData, 0644)
 }
 
-// genEPath generates the filepath of the created file encrypted file so that
-// it is in the same directory as the uPath (unencrypted filepath)
-func genEPath(uPath string) string {
-	var ePath = uPath + ".enc"
-	// if outName != "" {
-	// 	// Checking to see if the .enc extension was already included
-	// 	// as part of outName
-	// 	if outName[len(outName)-len(encExt):] == encExt {
-	// 		eName = outName
-	// 	} else {
-	// 		eName = outName + encExt
-	// 	}
-	// } else {
-	// 	ePath = uName + encExt
-	// }
-
+// genEPath generates the filepath of the created encrypted file so that
+// it is in the same directory as the unencrypted filepath (uPath). The
+// filename will end with the user-defined extension for encrypted files
+// (eExt).
+func genEPath(uPath, eExt string) string {
+	var ePath = uPath + eExt
 	return ePath
 }
 
-// genDName creates the filename for the decrypted file
-func genDPath(ePath string) string {
+// genDPath generates the filepath of the created decrypted file so that
+// it is in the same directory as the encrypted filepath (ePath). The new
+// filwname will be stripped of the file extension for encrypted files (eExt).
+func genDPath(ePath, eExt string) string {
 	eName := path.Base(ePath)
 	dName := "DECRYPTED-" + eName[:len(eName)-len(eExt)]
 	dPath := ePath[:len(ePath)-len(eName)] + dName
-	// if outName != "" {
-	// 	dName = outName
-	// } else {
-	// 	dName = eName[:len(eName)-len(encExt)]
-	// }
-
 	return dPath
 }
 
-// getKey
-func readKey(envVar string) ([]byte, error) {
+// readKey acquires the keypath from the given environment variable (envVar)
+// and returns the bytes of the key while chacking for errors. The key file must
+// end with the file extension designated for encryption keys (keyExt)
+func readKey(envVar, keyExt string) ([]byte, error) {
 	// Acquire keypath from environment variable
 	keyPath, envExists := os.LookupEnv(envVar)
 
