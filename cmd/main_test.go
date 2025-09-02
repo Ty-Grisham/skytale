@@ -40,43 +40,97 @@ func TestMain(m *testing.M) {
 
 // TestFunctionality will test the overall process of the encrypting/decrypting
 // given the expected (correct) inputs. This test should encounter no errors
-func TestFunctionality(t *testing.T) {
-	// TestBasic tests the basic encrypting/decrypting of the
-	// test file without concerning itself with the names of
-	// the files
-	t.Run("TestBasic", func(t *testing.T) {
-		// Encrypting file
-		ePath, err := createEFile(uPath, eExt, []byte(tmpKey))
+// func TestFunctionality(t *testing.T) {
+// 	// TestBasic tests the basic encrypting/decrypting of the
+// 	// test file without concerning itself with the names of
+// 	// the files
+// 	t.Run("TestBasic", func(t *testing.T) {
+// 		// Encrypting file
+// 		ePath, err := createEFile(uPath, eExt, []byte(tmpKey))
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+
+// 		// Decrypting file
+// 		dPath, err := createDFile(ePath, eExt, []byte(tmpKey))
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+
+// 		// Checking that the file was properly encrypted and decrypted
+// 		assertBytesFiles(t, dPath, uPath)
+// 	})
+
+// 	// PathCreation tests whether the created paths are as expected
+// 	t.Run("PathCreation", func(t *testing.T) {
+// 		assertStrings(t, resEPath, expEPath)
+// 		assertStrings(t, resDPath, expDPath)
+// 	})
+// }
+
+// TestErrors tests the program with input that should raise errors
+// func TestErrors(t *testing.T) {
+// 	// InvalidExtension tests the createDecFile function when it is provided with
+// 	// an input filepath that has an invalid file extension
+// 	t.Run("InvalidExtension", func(t *testing.T) {
+// 		// Attempting to decrypt file
+// 		dPath, err := createDFile(uPath, eExt, []byte(tmpKey)) // The extension of uPath is .md
+// 		assertErrors(t, err, ErrInvalidExtension)
+// 		os.Remove(dPath) // File is deleted if created
+// 	})
+// }
+
+// TestProcess tests the overall process of encrypting/decrypting files
+func TestProcess(t *testing.T) {
+	// Encrypt file
+	ePath, err := createEFile(uPath, eExt, tmpKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Decrypt file
+	dPath, err := createDFile(ePath, eExt, tmpKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check the bytes of the created decrypted file
+	assertBytesFiles(t, dPath, uPath)
+}
+
+// TestCreatePaths tests whether the paths created are as expected
+func TestCreatePaths(t *testing.T) {
+	assertStrings(t, resEPath, expEPath)
+	assertStrings(t, resDPath, expDPath)
+}
+
+// TestCreateEFile tests the createEFile function
+func TestCreateEFile(t *testing.T) {
+	// NoExpErr expects no error
+	t.Run("NoExpErr", func(t *testing.T) {
+		_, err := createEFile(uPath, eExt, tmpKey)
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		// Decrypting file
-		dPath, err := createDFile(ePath, eExt, []byte(tmpKey))
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// Checking that the file was properly encrypted and decrypted
-		assertBytesFiles(t, dPath, uPath)
-	})
-
-	// PathCreation tests whether the created paths are as expected
-	t.Run("PathCreation", func(t *testing.T) {
-		assertStrings(t, resEPath, expEPath)
-		assertStrings(t, resDPath, expDPath)
 	})
 }
 
-// TestErrors tests the program with input that should raise errors
-func TestErrors(t *testing.T) {
-	// InvalidExtension tests the createDecFile function when it is provided with
-	// an input filepath that has an invalid file extension
+// TestCreateDFile tests the createDFile function
+func TestCreateDFile(t *testing.T) {
+	// NoExpErr expects no errors
+	t.Run("NoExpErr", func(t *testing.T) {
+		_, err := createDFile(resEPath, eExt, tmpKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	// InvalidExtension should return an invalid
+	// extension error
 	t.Run("InvalidExtension", func(t *testing.T) {
-		// Attempting to decrypt file
-		dPath, err := createDFile(uPath, eExt, []byte(tmpKey)) // The extension of uPath is .md
+		invalidEPath := "/home/usr/sensitive_info.pdf"
+		_, err := createDFile(invalidEPath, eExt, tmpKey)
 		assertErrors(t, err, ErrInvalidExtension)
-		os.Remove(dPath) // File is deleted if created
 	})
 }
 
