@@ -38,48 +38,6 @@ func TestMain(m *testing.M) {
 	os.Exit(result)
 }
 
-// TestFunctionality will test the overall process of the encrypting/decrypting
-// given the expected (correct) inputs. This test should encounter no errors
-// func TestFunctionality(t *testing.T) {
-// 	// TestBasic tests the basic encrypting/decrypting of the
-// 	// test file without concerning itself with the names of
-// 	// the files
-// 	t.Run("TestBasic", func(t *testing.T) {
-// 		// Encrypting file
-// 		ePath, err := createEFile(uPath, eExt, []byte(tmpKey))
-// 		if err != nil {
-// 			t.Fatal(err)
-// 		}
-
-// 		// Decrypting file
-// 		dPath, err := createDFile(ePath, eExt, []byte(tmpKey))
-// 		if err != nil {
-// 			t.Fatal(err)
-// 		}
-
-// 		// Checking that the file was properly encrypted and decrypted
-// 		assertBytesFiles(t, dPath, uPath)
-// 	})
-
-// 	// PathCreation tests whether the created paths are as expected
-// 	t.Run("PathCreation", func(t *testing.T) {
-// 		assertStrings(t, resEPath, expEPath)
-// 		assertStrings(t, resDPath, expDPath)
-// 	})
-// }
-
-// TestErrors tests the program with input that should raise errors
-// func TestErrors(t *testing.T) {
-// 	// InvalidExtension tests the createDecFile function when it is provided with
-// 	// an input filepath that has an invalid file extension
-// 	t.Run("InvalidExtension", func(t *testing.T) {
-// 		// Attempting to decrypt file
-// 		dPath, err := createDFile(uPath, eExt, []byte(tmpKey)) // The extension of uPath is .md
-// 		assertErrors(t, err, ErrInvalidExtension)
-// 		os.Remove(dPath) // File is deleted if created
-// 	})
-// }
-
 // TestProcess tests the overall process of encrypting/decrypting files
 func TestProcess(t *testing.T) {
 	// Encrypt file
@@ -174,7 +132,7 @@ func TestReadKey(t *testing.T) {
 func assertErrors(t *testing.T, res, exp error) {
 	t.Helper()
 	if res == nil {
-		t.Fatal("Expected error, but none were raised")
+		t.Fatalf("Expected %s, but no errors were raised", exp)
 	}
 
 	if res != exp {
