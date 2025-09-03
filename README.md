@@ -1,5 +1,7 @@
 # Skytale
 
+*Skytale was a cipher tool used by the ancient Greeks and Spartans to encrypt and decrypt messages during military campaigns: (https://en.wikipedia.org/wiki/Scytale)*
+
 ## Description
 
 The objective of this project is to create a simple command-line application that can encrypt and decrypt files via AES-GCM.
