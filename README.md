@@ -19,7 +19,7 @@ While their is no technical difference between a *decrypted* file and an *unencr
 
 ```
 # Copy the source code from github
-~/$ git clone https://github.com/Ty-Grisham/skytale
+$ git clone https://github.com/Ty-Grisham/skytale
 
 # Navigate to the cmd directory of the repository
 ~/skytale$ cd cmd
@@ -39,10 +39,10 @@ $ export PATH=$PATH:/path/to/your/install/directory
 ### Usage
 ```
 # Encrypt file
-$PATH skytale -e </path/to/unencrypted/file.pdf>
+$ skytale -e </path/to/unencrypted/file.pdf>
 
 # Decrypt file
-$PATH shytale -d </path/to.encrypted/file.enc>
+$ shytale -d </path/to.encrypted/file.enc>
 ```
 
 *Note: Both decrypt and encrypt options will create a new encrypted/decrypted file, but will not delete previous versions of the file.*
@@ -80,5 +80,5 @@ Once finished viewing, the user should manually remove `DECRYPTED-sensitive_info
 
 ```
 # Removing decrypted file
-/path/to/$ rm DECRYPTED-sensitive_info.txt 
+/path/to$ rm DECRYPTED-sensitive_info.txt 
 ```
