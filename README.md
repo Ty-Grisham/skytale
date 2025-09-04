@@ -35,14 +35,17 @@ $ export PATH=$PATH:/path/to/your/install/directory
 
 - Encrypts file given filepath to unencrypted file and encryption key
 - Decrypts file given filepath to encrypted file and key used to encrypt file
+- Can accept input from STDIN
 
 ### Usage
 ```
 # Encrypt file
 $PATH skytale -e </path/to/unencrypted/file.pdf>
+$ echo <path/to/unencrypted/file.pdf> | skytale -e
 
 # Decrypt file
-$PATH shytale -d </path/to.encrypted/file.enc>
+$PATH skytale -d </path/to/encrypted/file.pdf.enc>
+$ echo <path/to/encrypted/file.pdf.enc> | skytale -d
 ```
 
 *Note: Both decrypt and encrypt options will create a new encrypted/decrypted file, but will not delete previous versions of the file.*
