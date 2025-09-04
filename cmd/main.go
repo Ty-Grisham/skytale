@@ -86,11 +86,14 @@ func createEFile(uPath, eExt string, key []byte) (string, error) {
 	}
 
 	// Encrypt unencrypted data
+	if key == nil {
+		return "", fmt.Errorf("no key detected")
+	}
+
 	eData, err := cryptography.Encrypt(uData, key)
 	if err != nil {
 		return "", err
 	}
-
 	ePath := genEPath(uPath, eExt)
 
 	// Write new encrypted file
@@ -105,7 +108,7 @@ func createEFile(uPath, eExt string, key []byte) (string, error) {
 func createDFile(ePath, eExt string, key []byte) (string, error) {
 	// Check to see that the given file ends in the proper file extension
 	if ePath[len(ePath)-len(eExt):] != eExt {
-		return "", ErrInvalidExtension
+		return "", fmt.Errorf("%w: in order to be decrypted, file's extension must be %q", ErrInvalidExtension, eExt)
 	}
 
 	// Extract encrypted data from given file
@@ -158,7 +161,7 @@ func readKey(envVar, keyExt string) ([]byte, error) {
 	case keyPath == "":
 		return nil, ErrEnvNotSet
 	case keyPath[len(keyPath)-len(keyExt):] != keyExt: // checking for correct file extension
-		return nil, ErrInvalidExtension
+		return nil, fmt.Errorf("%w: key file must have %q extension", ErrInvalidExtension, keyExt)
 	case keyPath != "" && keyPath[len(keyPath)-len(keyExt):] == keyExt:
 		return os.ReadFile(keyPath)
 	default:

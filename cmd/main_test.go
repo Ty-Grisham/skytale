@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -160,7 +161,7 @@ func assertErrors(t *testing.T, res, exp error) {
 		t.Fatalf("Expected %s, but no errors were raised", exp)
 	}
 
-	if res != exp {
+	if !errors.Is(res, exp) {
 		t.Errorf("Expected %q, got %q", exp, res)
 	}
 }
