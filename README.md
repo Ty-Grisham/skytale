@@ -1,5 +1,7 @@
 # Skytale
 
+*Skytale was a cipher tool used by the ancient Greeks and Spartans to encrypt and decrypt messages during military campaigns: (https://en.wikipedia.org/wiki/Scytale)*
+
 ## Description
 
 The objective of this project is to create a simple command-line application that can encrypt and decrypt files via AES-GCM.
@@ -19,7 +21,7 @@ While their is no technical difference between a *decrypted* file and an *unencr
 
 ```
 # Copy the source code from github
-~/$ git clone https://github.com/Ty-Grisham/skytale
+$ git clone https://github.com/Ty-Grisham/skytale
 
 # Navigate to the cmd directory of the repository
 ~/skytale$ cd cmd
@@ -83,5 +85,5 @@ Once finished viewing, the user should manually remove `DECRYPTED-sensitive_info
 
 ```
 # Removing decrypted file
-/path/to/$ rm DECRYPTED-sensitive_info.txt 
+/path/to$ rm DECRYPTED-sensitive_info.txt 
 ```
