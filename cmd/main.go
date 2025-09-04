@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path"
 
@@ -24,8 +26,8 @@ const (
 
 func main() {
 	// Add command line options
-	encrypt := flag.String("e", "", "File to be encrypted")
-	decrypt := flag.String("d", "", "File to be decrypted")
+	encrypt := flag.Bool("e", false, "File to be encrypted")
+	decrypt := flag.Bool("d", false, "File to be decrypted")
 
 	flag.Parse()
 
@@ -37,8 +39,12 @@ func main() {
 
 	switch {
 	// Encrypt file
-	case *encrypt != "":
-		cFilename, err := createEFile(*encrypt, eExt, key)
+	case *encrypt:
+		uPath, err := getFilepath(os.Stdin, flag.Arg(0))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+		cFilename, err := createEFile(uPath, eExt, key)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -47,8 +53,12 @@ func main() {
 		fmt.Fprintf(os.Stdout, "Created encrypted file: %s\n", cFilename)
 
 	// Decrypt file
-	case *decrypt != "":
-		cFilename, err := createDFile(*decrypt, eExt, key)
+	case *decrypt:
+		ePath, err := getFilepath(os.Stdin, flag.Arg(0))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+		cFilename, err := createDFile(ePath, eExt, key)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -154,4 +164,25 @@ func readKey(envVar, keyExt string) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("could not obtain environment variable")
 	}
+}
+
+// getFilepath decides where to get the filepath from: arguments or STDIN.
+// Returns a string containing a filepath
+func getFilepath(r io.Reader, arg string) (string, error) {
+	// If an argument is provided, retufn the argument as the path
+	if len(arg) > 0 {
+		return arg, nil
+	}
+
+	// Scan the provided reader for input
+	s := bufio.NewScanner(r)
+	s.Scan()
+	if err := s.Err(); err != nil {
+		return "", fmt.Errorf("%w: Error scanning from STDIN", err)
+	}
+	if len(s.Text()) == 0 {
+		return "", fmt.Errorf("path cannot be blank")
+	}
+
+	return s.Text(), nil
 }

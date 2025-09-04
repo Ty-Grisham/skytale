@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -124,6 +125,30 @@ func TestReadKey(t *testing.T) {
 		t.Setenv(envVar, uPath)
 		_, err := readKey(envVar, keyExt)
 		assertErrors(t, err, ErrInvalidExtension)
+	})
+}
+
+// TestGetFilepath will be an integration test to test the getFilepath function
+func TestGetFilepath(t *testing.T) {
+
+	// ArgsInput recieves input from arguments
+	t.Run("ArgsInput", func(t *testing.T) {
+		r := strings.NewReader("") // simulating blank STDIN input
+		res, err := getFilepath(r, uPath)
+		if err != nil {
+			t.Error(err)
+		}
+		assertStrings(t, res, uPath)
+	})
+
+	// STDIN recieves inpout from STDIN
+	t.Run("STDIN", func(t *testing.T) {
+		r := strings.NewReader(uPath) // simulating input from STDIN
+		res, err := getFilepath(r, "")
+		if err != nil {
+			t.Error(err)
+		}
+		assertStrings(t, res, uPath)
 	})
 }
 
